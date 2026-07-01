@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drumbeat Maker</title>
+    <link rel="stylesheet" href="./styles.css">
+</head>
+
+<body>
+    <div class="page-shell">
+        <section class="card hero">
+            <div class="eyebrow">Free beginner drum app</div>
+            <h1>Learn beat, groove, soul, neo soul, and R&amp;B.</h1>
+            <p class="subtitle">Tap pads, hear the pocket, and build loops with no login, no payment, and no sample
+                pack. Everything runs in your browser with drum sounds generated on the fly.</p>
+            <div class="hero-grid">
+                <div class="hero-note">
+                    <div class="label-chip">Finger drumming</div>
+                    <h2>Play a 4x4 pad rack</h2>
+                    <p>Use the pads or your keyboard to trigger kick, snare, hats, and texture sounds while you learn
+                        the shape of a groove.</p>
+                </div>
+                <div class="hero-note">
+                    <div class="label-chip label-chip-alt">Pocket training</div>
+                    <h2>See swing and gap in motion</h2>
+                    <p>Adjust timing controls to hear how small delays change the feel of soul and neo soul patterns.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <nav class="tabs" aria-label="Drum app sections">
+            <button class="tab-button is-active" data-tab="learn" type="button">Learn</button>
+            <button class="tab-button" data-tab="pads" type="button">Pads</button>
+            <button class="tab-button" data-tab="sequencer" type="button">Sequencer</button>
+            <button class="tab-button" data-tab="export" type="button">Export</button>
+        </nav>
+
+        <section class="tab-panel is-active" id="learn">
+            <div class="split-grid">
+                <div class="card">
+                    <div class="section-heading">
+                        <div class="section-kicker">Lesson modules</div>
+                        <h2>Start with the backbeat, then lean into the pocket</h2>
+                    </div>
+                    <p class="lead-text">Choose a starting feel. Each module loads a beginner-friendly loop with a
+                        different swing, density, and backbeat shape.</p>
+                    <div class="genre-switches" id="genreButtons"></div>
+                    <div class="callout callout-blue">
+                        <h3 id="genreTitle">Beat Basics</h3>
+                        <p id="genreDescription">Lock the snare on 2 and 4, keep the kick simple, and use hats to count
+                            the grid.</p>
+                    </div>
+                    <div class="mini-stack" style="margin-top: 14px;">
+                        <div class="callout callout-gold">
+                            <h3>Beginner rule</h3>
+                            <p id="genreTip">Less is more. A clear backbeat makes the pocket easier to hear than a busy
+                                pattern.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="section-heading">
+                        <div class="section-kicker">Pocket control</div>
+                        <h2>Shape the feel before you play</h2>
+                    </div>
+                    <div class="control-grid">
+                        <div class="control-row">
+                            <span>Tempo</span>
+                            <input id="tempoSlider" type="range" min="60" max="120" step="1" value="88"
+                                aria-label="Tempo">
+                            <strong id="tempoValue">88 BPM</strong>
+                        </div>
+                        <div class="control-row">
+                            <span>Swing</span>
+                            <input id="swingSlider" type="range" min="0" max="45" step="1" value="4"
+                                aria-label="Swing amount">
+                            <strong id="swingValue">4%</strong>
+                        </div>
+                        <div class="control-row">
+                            <span>Gap</span>
+                            <input id="gapSlider" type="range" min="0" max="80" step="1" value="8"
+                                aria-label="Gap amount">
+                            <strong id="gapValue">8 ms</strong>
+                        </div>
+                    </div>
+                    <div class="metric-grid">
+                        <div class="metric">
+                            <span>Loop length</span>
+                            <strong id="loopLength">1 bar</strong>
+                        </div>
+                        <div class="metric">
+                            <span>Current feel</span>
+                            <strong id="currentFeel">Beat Basics</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="tab-panel" id="pads">
+            <div class="split-grid">
+                <div class="card">
+                    <div class="section-heading">
+                        <div class="section-kicker">Finger drumming</div>
+                        <h2>Tap the pad rack to hear each sound</h2>
+                    </div>
+                    <p class="lead-text">Use the mouse, touch, or keyboard. Shift-click a sequencer cell to place a
+                        softer ghost note.</p>
+                    <div class="pad-grid" id="padGrid"></div>
+                </div>
+                <div class="card">
+                    <div class="section-heading">
+                        <div class="section-kicker">Real-time feedback</div>
+                        <h2>Track timing while you practice</h2>
+                    </div>
+                    <div class="metric-grid">
+                        <div class="metric">
+                            <span>Accuracy</span>
+                            <strong id="accuracyScore">100</strong>
+                        </div>
+                        <div class="metric">
+                            <span>On time</span>
+                            <strong id="deadOnCount">0</strong>
+                        </div>
+                        <div class="metric">
+                            <span>Early</span>
+                            <strong id="earlyCount">0</strong>
+                        </div>
+                        <div class="metric">
+                            <span>Late</span>
+                            <strong id="lateCount">0</strong>
+                        </div>
+                    </div>
+                    <div class="callout callout-gold" style="margin-top: 18px;">
+                        <h3>How the score works</h3>
+                        <p>Your taps are compared against the moving grid. Tight timing scores higher, and the log shows
+                            whether you landed early, late, or dead on the beat.</p>
+                    </div>
+                    <div class="accuracy-log" id="hitLog"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="tab-panel" id="sequencer">
+            <div class="card">
+                <div class="section-heading">
+                    <div class="section-kicker">Step sequencer</div>
+                    <h2>Watch the notes snap to the grid</h2>
+                </div>
+                <p class="lead-text">Click cells to build a loop. The current step lights up while the pattern plays, so
+                    beginners can see where each note lands.</p>
+                <div class="sequencer-shell">
+                    <div class="sequencer-grid" id="sequencerBoard"></div>
+                </div>
+                <div class="sequencer-actions"
+                    style="grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 16px;">
+                    <button class="action-button is-primary" id="playButton" type="button">Play</button>
+                    <button class="action-button is-subtle" id="stopButton" type="button">Stop</button>
+                    <button class="action-button is-subtle" id="clearButton" type="button">Clear pattern</button>
+                    <button class="action-button is-subtle" id="resetButton" type="button">Reload lesson</button>
+                </div>
+                <div class="status-line" id="statusLine" style="margin-top: 14px;">Ready to build a groove.</div>
+            </div>
+        </section>
+
+        <section class="tab-panel" id="export">
+            <div class="split-grid">
+                <div class="card">
+                    <div class="section-heading">
+                        <div class="section-kicker">Export</div>
+                        <h2>Save the loop as MIDI or WAV</h2>
+                    </div>
+                    <p class="lead-text">Download a MIDI loop for Logic Pro, FL Studio, or any DAW, plus a WAV sketch of
+                        the current groove.</p>
+                    <div class="export-box">
+                        <button class="text-link" id="midiButton" type="button">Download MIDI</button>
+                        <button class="text-link" id="wavButton" type="button">Download WAV</button>
+                        <div class="export-preview">
+                            <h3>Current loop</h3>
+                            <p id="exportSummary">Beat Basics at 88 BPM with a light swing and a small pocket gap. The
+                                starter groove keeps the backbeat clear.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="section-heading">
+                        <div class="section-kicker">Practice notes</div>
+                        <h2>What beginners should listen for</h2>
+                    </div>
+                    <div class="callout callout-blue">
+                        <h3>Beat basics</h3>
+                        <p>Snare on 2 and 4. Keep kick notes simple so the groove stays easy to feel.</p>
+                    </div>
+                    <div class="callout" style="margin-top: 14px;">
+                        <h3>R&amp;B and soul</h3>
+                        <p>Use fewer notes, lighter hats, and small velocity changes so the groove sounds relaxed
+                            instead of busy.</p>
+                    </div>
+                    <div class="callout callout-gold" style="margin-top: 14px;">
+                        <h3>Neo soul</h3>
+                        <p>Let the snare sit deeper in the pocket, add syncopated hats, and leave space around the kick.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>Free browser-based drum trainer for beginners. No login, no paid samples, no hidden download gate.</p>
+        </footer>
+    </div>
+
+    <script src="./app.js"></script>
+</body>
+
+</html>

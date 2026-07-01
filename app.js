@@ -1,85 +1,5 @@
-const TRACKS = [
-    { name: 'Kick', id: 'kick', key: '1', help: '808 boom' },
-    { name: 'Snare', id: 'snare', key: '2', help: 'backbeat' },
-    { name: 'Hat', id: 'hat', key: '3', help: 'pulse' },
-    { name: 'Perc', id: 'perc', key: '4', help: 'texture' },
-];
-
-const PAD_LAYOUT = [
-    { id: 'kick', label: 'Kick', subtitle: '808 sub', key: '1' },
-    { id: 'snare', label: 'Snare', subtitle: '909 crack', key: '2' },
-    { id: 'hat', label: 'Closed Hat', subtitle: 'tight pulse', key: '3' },
-    { id: 'openHat', label: 'Open Hat', subtitle: 'lift the bar', key: '4' },
-    { id: 'rim', label: 'Rim', subtitle: 'soft click', key: 'Q' },
-    { id: 'clap', label: 'Clap', subtitle: 'wide snap', key: 'W' },
-    { id: 'tomLow', label: 'Low Tom', subtitle: 'warm body', key: 'E' },
-    { id: 'tomHigh', label: 'High Tom', subtitle: 'lift the groove', key: 'R' },
-    { id: 'ghost', label: 'Ghost', subtitle: 'barely there', key: 'A' },
-    { id: 'shaker', label: 'Shaker', subtitle: 'soft motion', key: 'S' },
-    { id: 'bell', label: 'Bell', subtitle: 'sparkle', key: 'D' },
-    { id: 'crash', label: 'Crash', subtitle: 'scene change', key: 'F' },
-    { id: 'sub', label: 'Sub Hit', subtitle: 'low weight', key: 'Z' },
-    { id: 'wood', label: 'Wood Block', subtitle: 'dry accent', key: 'X' },
-    { id: 'ride', label: 'Ride', subtitle: 'soft wash', key: 'C' },
-    { id: 'fx', label: 'FX', subtitle: 'air and space', key: 'V' },
-];
-
-const TRACK_DEFAULT_VELOCITIES = {
-    0: 0.95,
-    1: 0.9,
-    2: 0.62,
-    3: 0.48,
-};
-
-const sequenceLength = 16;
-
-const GENRES = {
-    basics: {
-        label: 'Beat Basics',
-        tempo: 88,
-        swing: 0.04,
-        gap: 8,
-        description: 'Lock the snare on 2 and 4, keep the kick simple, and use hats to count the grid.',
-        tip: 'Less is more. A clear backbeat makes the pocket easier to hear than a busy pattern.',
-        summary: 'Beat Basics at 88 BPM with a light swing and a small pocket gap. The starter groove keeps the backbeat clear.',
-        pattern: {
-            kick: cells([[0, 0.95], [7, 0.84], [8, 0.92], [14, 0.88]]),
-            snare: cells([[4, 0.95], [12, 0.95]]),
-            hat: cells([[0, 0.58], [2, 0.54], [4, 0.62], [6, 0.54], [8, 0.6], [10, 0.54], [12, 0.62], [14, 0.54]]),
-            perc: cells([[11, 0.42], [15, 0.4]]),
-        },
-    },
-    soul: {
-        label: 'R&B / Soul',
-        tempo: 76,
-        swing: 0.14,
-        gap: 22,
-        description: 'Use fewer notes, add ghost hits, and let the snare sit a little behind the grid.',
-        tip: 'A sparse kick pattern leaves room for the groove. Ghost notes should feel small, not loud.',
-        summary: 'R&B / Soul at 76 BPM with stronger swing and more gap on the pocket tracks. The loop stays relaxed and spacious.',
-        pattern: {
-            kick: cells([[0, 0.9], [6, 0.72], [8, 0.86], [13, 0.74]]),
-            snare: cells([[4, 0.9], [10, 0.48], [12, 0.93]]),
-            hat: cells([[1, 0.42], [3, 0.52], [5, 0.4], [7, 0.5], [9, 0.42], [11, 0.52], [13, 0.4], [15, 0.48]]),
-            perc: cells([[7, 0.35], [15, 0.34]]),
-        },
-    },
-    neoSoul: {
-        label: 'Neo Soul',
-        tempo: 68,
-        swing: 0.24,
-        gap: 34,
-        description: 'Lean into halftime space, syncopated hats, and deep kick placement for a looser feel.',
-        tip: 'Neo soul is about balance: keep the groove deep, but leave enough air around every accent.',
-        summary: 'Neo Soul at 68 BPM with a deeper pocket and a larger delay on kick and hat lanes. The rhythm breathes more between hits.',
-        pattern: {
-            kick: cells([[0, 0.92], [3, 0.58], [6, 0.72], [10, 0.8], [13, 0.56]]),
-            snare: cells([[8, 0.92], [12, 0.52]]),
-            hat: cells([[0, 0.38], [2, 0.48], [3, 0.34], [5, 0.42], [7, 0.36], [8, 0.42], [10, 0.5], [11, 0.36], [13, 0.44], [15, 0.34]]),
-            perc: cells([[4, 0.38], [14, 0.44]]),
-        },
-    },
-};
+const { TRACKS, PAD_LAYOUT, TRACK_DEFAULT_VELOCITIES, sequenceLength, GENRES } = window.DrumbeatData;
+const DrumbeatAudio = window.DrumbeatAudio;
 
 const state = {
     genre: 'basics',
@@ -139,16 +59,6 @@ applyGenre('basics', { resetControls: true, announce: false });
 bindEvents();
 refreshUI();
 
-function cells(notes) {
-    const lane = Array.from({ length: sequenceLength }, () => ({ on: false, velocity: 0.8 }));
-
-    for (const [step, velocity] of notes) {
-        lane[step] = { on: true, velocity };
-    }
-
-    return lane;
-}
-
 function createEmptySequence() {
     return TRACKS.map(() => Array.from({ length: sequenceLength }, () => ({ on: false, velocity: 0.8 })));
 }
@@ -187,7 +97,7 @@ function renderPadGrid() {
         button.dataset.key = pad.key;
         button.innerHTML = `<strong>${pad.label}</strong><span>${pad.subtitle}</span><small>${pad.key}</small>`;
         button.addEventListener('pointerdown', async () => {
-            await ensureAudio();
+            await DrumbeatAudio.ensureAudio(state);
             triggerPad(pad.id, 1, true);
         });
         elements.padGrid.appendChild(button);
@@ -259,7 +169,7 @@ function bindEvents() {
     });
 
     elements.playButton.addEventListener('click', async () => {
-        await ensureAudio();
+        await DrumbeatAudio.ensureAudio(state);
         startPlayback();
     });
 
@@ -279,7 +189,7 @@ function bindEvents() {
             if (state.playing) {
                 stopPlayback();
             } else {
-                await ensureAudio();
+                await DrumbeatAudio.ensureAudio(state);
                 startPlayback();
             }
 
@@ -290,7 +200,7 @@ function bindEvents() {
         const padId = padKeyMap.get(key);
 
         if (padId) {
-            await ensureAudio();
+            await DrumbeatAudio.ensureAudio(state);
             triggerPad(padId, 1, true);
         }
     });
@@ -458,18 +368,18 @@ function playSequenceStep(step) {
         }
 
         const offset = track.id === 'snare' ? 0 : state.gap / 1000;
-        triggerSound(track.id, cell.velocity, audioTime + offset);
+        DrumbeatAudio.triggerSound(state.audioContext, track.id, cell.velocity, audioTime + offset);
     });
 
     if (step % 4 === 0) {
-        triggerSound('click', 0.4, audioTime);
+        DrumbeatAudio.triggerSound(state.audioContext, 'click', 0.4, audioTime);
     }
 }
 
 function triggerPad(padId, velocity = 1, fromInteraction = false) {
     const trackVelocity = Math.max(0.2, Math.min(1, velocity));
     const startTime = state.audioContext.currentTime + 0.005;
-    triggerSound(padId, trackVelocity, startTime);
+    DrumbeatAudio.triggerSound(state.audioContext, padId, trackVelocity, startTime);
     flashPad(padId);
 
     if (fromInteraction) {
@@ -551,370 +461,6 @@ function getBarDuration() {
     return state.stepDurations.reduce((sum, duration) => sum + duration, 0);
 }
 
-function triggerSound(id, velocity, time) {
-    const context = state.audioContext;
-    const gain = Math.max(0.05, Math.min(1, velocity));
-
-    if (id === 'kick') {
-        playKick(context, time, gain);
-        return;
-    }
-
-    if (id === 'snare') {
-        playSnare(context, time, gain);
-        return;
-    }
-
-    if (id === 'hat') {
-        playHat(context, time, gain, false);
-        return;
-    }
-
-    if (id === 'openHat') {
-        playHat(context, time, gain, true);
-        return;
-    }
-
-    if (id === 'rim') {
-        playRim(context, time, gain);
-        return;
-    }
-
-    if (id === 'clap') {
-        playClap(context, time, gain);
-        return;
-    }
-
-    if (id === 'tomLow') {
-        playTom(context, time, gain, 110);
-        return;
-    }
-
-    if (id === 'tomHigh') {
-        playTom(context, time, gain, 180);
-        return;
-    }
-
-    if (id === 'ghost') {
-        playGhost(context, time, gain);
-        return;
-    }
-
-    if (id === 'shaker') {
-        playShaker(context, time, gain);
-        return;
-    }
-
-    if (id === 'bell') {
-        playBell(context, time, gain);
-        return;
-    }
-
-    if (id === 'crash') {
-        playCrash(context, time, gain);
-        return;
-    }
-
-    if (id === 'sub') {
-        playSub(context, time, gain);
-        return;
-    }
-
-    if (id === 'wood') {
-        playWood(context, time, gain);
-        return;
-    }
-
-    if (id === 'ride') {
-        playRide(context, time, gain);
-        return;
-    }
-
-    if (id === 'fx') {
-        playFx(context, time, gain);
-    }
-}
-
-async function ensureAudio() {
-    if (!state.audioContext) {
-        state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    }
-
-    if (state.audioContext.state === 'suspended') {
-        await state.audioContext.resume();
-    }
-}
-
-function playKick(context, time, velocity) {
-    const osc = context.createOscillator();
-    const gain = context.createGain();
-    const filter = context.createBiquadFilter();
-
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(140, time);
-    osc.frequency.exponentialRampToValueAtTime(48, time + 0.18);
-
-    gain.gain.setValueAtTime(0.001, time);
-    gain.gain.exponentialRampToValueAtTime(0.92 * velocity, time + 0.01);
-    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.25);
-
-    filter.type = 'lowpass';
-    filter.frequency.value = 420;
-
-    osc.connect(filter);
-    filter.connect(gain);
-    gain.connect(context.destination);
-    osc.start(time);
-    osc.stop(time + 0.28);
-}
-
-function playSnare(context, time, velocity) {
-    const noise = createNoiseBuffer(context, 0.22);
-    const source = context.createBufferSource();
-    source.buffer = noise;
-
-    const noiseFilter = context.createBiquadFilter();
-    noiseFilter.type = 'bandpass';
-    noiseFilter.frequency.value = 1800;
-    noiseFilter.Q.value = 0.75;
-
-    const tone = context.createOscillator();
-    tone.type = 'triangle';
-    tone.frequency.value = 200;
-
-    const noiseGain = context.createGain();
-    const toneGain = context.createGain();
-    noiseGain.gain.setValueAtTime(0.001, time);
-    noiseGain.gain.exponentialRampToValueAtTime(0.8 * velocity, time + 0.01);
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, time + 0.18);
-    toneGain.gain.setValueAtTime(0.001, time);
-    toneGain.gain.exponentialRampToValueAtTime(0.28 * velocity, time + 0.01);
-    toneGain.gain.exponentialRampToValueAtTime(0.001, time + 0.12);
-
-    source.connect(noiseFilter);
-    noiseFilter.connect(noiseGain);
-    tone.connect(toneGain);
-    noiseGain.connect(context.destination);
-    toneGain.connect(context.destination);
-    source.start(time);
-    source.stop(time + 0.22);
-    tone.start(time);
-    tone.stop(time + 0.14);
-}
-
-function playHat(context, time, velocity, open = false) {
-    const noise = createNoiseBuffer(context, open ? 0.35 : 0.12);
-    const source = context.createBufferSource();
-    source.buffer = noise;
-
-    const filter = context.createBiquadFilter();
-    filter.type = 'highpass';
-    filter.frequency.value = open ? 5600 : 7600;
-
-    const gain = context.createGain();
-    gain.gain.setValueAtTime(0.001, time);
-    gain.gain.exponentialRampToValueAtTime((open ? 0.46 : 0.26) * velocity, time + 0.005);
-    gain.gain.exponentialRampToValueAtTime(0.001, time + (open ? 0.18 : 0.08));
-
-    source.connect(filter);
-    filter.connect(gain);
-    gain.connect(context.destination);
-    source.start(time);
-    source.stop(time + (open ? 0.3 : 0.12));
-}
-
-function playRim(context, time, velocity) {
-    playClick(context, time, velocity * 0.75, 2400, 1600, 0.03);
-}
-
-function playClap(context, time, velocity) {
-    const noise = createNoiseBuffer(context, 0.25);
-    const source = context.createBufferSource();
-    source.buffer = noise;
-
-    const filter = context.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.frequency.value = 2200;
-
-    const gain = context.createGain();
-    gain.gain.setValueAtTime(0.001, time);
-    gain.gain.exponentialRampToValueAtTime(0.58 * velocity, time + 0.015);
-    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.22);
-
-    source.connect(filter);
-    filter.connect(gain);
-    gain.connect(context.destination);
-    source.start(time);
-    source.stop(time + 0.25);
-}
-
-function playTom(context, time, velocity, frequency) {
-    const osc = context.createOscillator();
-    const gain = context.createGain();
-
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(frequency, time);
-    osc.frequency.exponentialRampToValueAtTime(frequency * 0.72, time + 0.16);
-
-    gain.gain.setValueAtTime(0.001, time);
-    gain.gain.exponentialRampToValueAtTime(0.5 * velocity, time + 0.008);
-    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.22);
-
-    osc.connect(gain);
-    gain.connect(context.destination);
-    osc.start(time);
-    osc.stop(time + 0.25);
-}
-
-function playGhost(context, time, velocity) {
-    playClick(context, time, velocity * 0.45, 1500, 900, 0.02);
-}
-
-function playShaker(context, time, velocity) {
-    const noise = createNoiseBuffer(context, 0.09);
-    const source = context.createBufferSource();
-    source.buffer = noise;
-
-    const filter = context.createBiquadFilter();
-    filter.type = 'highpass';
-    filter.frequency.value = 9000;
-
-    const gain = context.createGain();
-    gain.gain.setValueAtTime(0.001, time);
-    gain.gain.exponentialRampToValueAtTime(0.18 * velocity, time + 0.004);
-    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.06);
-
-    source.connect(filter);
-    filter.connect(gain);
-    gain.connect(context.destination);
-    source.start(time);
-    source.stop(time + 0.09);
-}
-
-function playBell(context, time, velocity) {
-    const osc = context.createOscillator();
-    const gain = context.createGain();
-    const filter = context.createBiquadFilter();
-
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(880, time);
-    osc.frequency.exponentialRampToValueAtTime(1320, time + 0.01);
-    osc.frequency.exponentialRampToValueAtTime(660, time + 0.16);
-
-    filter.type = 'bandpass';
-    filter.frequency.value = 1600;
-    filter.Q.value = 3;
-
-    gain.gain.setValueAtTime(0.001, time);
-    gain.gain.exponentialRampToValueAtTime(0.28 * velocity, time + 0.01);
-    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.3);
-
-    osc.connect(filter);
-    filter.connect(gain);
-    gain.connect(context.destination);
-    osc.start(time);
-    osc.stop(time + 0.32);
-}
-
-function playCrash(context, time, velocity) {
-    const noise = createNoiseBuffer(context, 0.8);
-    const source = context.createBufferSource();
-    source.buffer = noise;
-
-    const filter = context.createBiquadFilter();
-    filter.type = 'highpass';
-    filter.frequency.value = 4800;
-
-    const gain = context.createGain();
-    gain.gain.setValueAtTime(0.001, time);
-    gain.gain.exponentialRampToValueAtTime(0.38 * velocity, time + 0.01);
-    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.75);
-
-    source.connect(filter);
-    filter.connect(gain);
-    gain.connect(context.destination);
-    source.start(time);
-    source.stop(time + 0.8);
-}
-
-function playSub(context, time, velocity) {
-    const osc = context.createOscillator();
-    const gain = context.createGain();
-
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(58, time);
-    osc.frequency.exponentialRampToValueAtTime(34, time + 0.22);
-
-    gain.gain.setValueAtTime(0.001, time);
-    gain.gain.exponentialRampToValueAtTime(0.5 * velocity, time + 0.01);
-    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.26);
-
-    osc.connect(gain);
-    gain.connect(context.destination);
-    osc.start(time);
-    osc.stop(time + 0.28);
-}
-
-function playWood(context, time, velocity) {
-    playClick(context, time, velocity * 0.6, 3200, 2200, 0.03);
-}
-
-function playRide(context, time, velocity) {
-    playHat(context, time, velocity * 0.85, true);
-}
-
-function playFx(context, time, velocity) {
-    const noise = createNoiseBuffer(context, 0.5);
-    const source = context.createBufferSource();
-    source.buffer = noise;
-
-    const filter = context.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.frequency.value = 1300;
-    filter.Q.value = 0.5;
-
-    const gain = context.createGain();
-    gain.gain.setValueAtTime(0.001, time);
-    gain.gain.exponentialRampToValueAtTime(0.22 * velocity, time + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.45);
-
-    source.connect(filter);
-    filter.connect(gain);
-    gain.connect(context.destination);
-    source.start(time);
-    source.stop(time + 0.48);
-}
-
-function playClick(context, time, velocity, frequencyA = 2200, frequencyB = 1400, release = 0.05) {
-    const osc = context.createOscillator();
-    const gain = context.createGain();
-
-    osc.type = 'square';
-    osc.frequency.setValueAtTime(frequencyA, time);
-    osc.frequency.exponentialRampToValueAtTime(frequencyB, time + 0.01);
-
-    gain.gain.setValueAtTime(0.001, time);
-    gain.gain.exponentialRampToValueAtTime(0.14 * velocity, time + 0.004);
-    gain.gain.exponentialRampToValueAtTime(0.001, time + release);
-
-    osc.connect(gain);
-    gain.connect(context.destination);
-    osc.start(time);
-    osc.stop(time + release + 0.02);
-}
-
-function createNoiseBuffer(context, duration) {
-    const sampleRate = context.sampleRate;
-    const buffer = context.createBuffer(1, Math.max(1, Math.floor(sampleRate * duration)), sampleRate);
-    const channel = buffer.getChannelData(0);
-
-    for (let index = 0; index < channel.length; index += 1) {
-        channel[index] = Math.random() * 2 - 1;
-    }
-
-    return buffer;
-}
-
 async function downloadMidi() {
     const bytes = buildMidiFile();
     downloadBlob(new Blob([bytes], { type: 'audio/midi' }), `drumbeat-maker-${state.genre}.mid`);
@@ -922,7 +468,7 @@ async function downloadMidi() {
 }
 
 async function downloadWav() {
-    await ensureAudio();
+    await DrumbeatAudio.ensureAudio(state);
     const renderDuration = getBarDuration() + 1.0;
     const OfflineContext = window.OfflineAudioContext || window.webkitOfflineAudioContext;
     const offline = new OfflineContext(2, Math.ceil(state.audioContext.sampleRate * renderDuration), state.audioContext.sampleRate);
@@ -948,48 +494,10 @@ function renderSequenceToContext(context) {
             }
 
             const offset = track.id === 'snare' ? 0 : state.gap / 1000;
-            triggerSoundOnContext(context, track.id, cell.velocity, stepTime + offset);
+            DrumbeatAudio.triggerSound(context, track.id, cell.velocity, stepTime + offset);
         });
 
         currentTime += step % 2 === 0 ? baseStep * (1 - state.swing * 0.5) : baseStep * (1 + state.swing * 0.5);
-    }
-}
-
-function triggerSoundOnContext(context, id, velocity, time) {
-    const gain = Math.max(0.05, Math.min(1, velocity));
-
-    if (id === 'kick') {
-        playKick(context, time, gain);
-    } else if (id === 'snare') {
-        playSnare(context, time, gain);
-    } else if (id === 'hat') {
-        playHat(context, time, gain, false);
-    } else if (id === 'openHat') {
-        playHat(context, time, gain, true);
-    } else if (id === 'rim') {
-        playRim(context, time, gain);
-    } else if (id === 'clap') {
-        playClap(context, time, gain);
-    } else if (id === 'tomLow') {
-        playTom(context, time, gain, 110);
-    } else if (id === 'tomHigh') {
-        playTom(context, time, gain, 180);
-    } else if (id === 'ghost') {
-        playGhost(context, time, gain);
-    } else if (id === 'shaker') {
-        playShaker(context, time, gain);
-    } else if (id === 'bell') {
-        playBell(context, time, gain);
-    } else if (id === 'crash') {
-        playCrash(context, time, gain);
-    } else if (id === 'sub') {
-        playSub(context, time, gain);
-    } else if (id === 'wood') {
-        playWood(context, time, gain);
-    } else if (id === 'ride') {
-        playRide(context, time, gain);
-    } else if (id === 'fx') {
-        playFx(context, time, gain);
     }
 }
 
